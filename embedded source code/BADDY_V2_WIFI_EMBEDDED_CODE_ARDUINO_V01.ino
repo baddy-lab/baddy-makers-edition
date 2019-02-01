@@ -93,9 +93,9 @@ String JsonConfigure;
 String JsonSpeeds;
 
 //Wifi related static values for BADDY as a server
-const char *BADDY_ID = "FR046"; // Usually CCDDD where CC is your country and DDD is a 3 digit number between 000 and 999
-const char *ssid = "BADDY-FR046"; // Keep "BADDY-" and add your BADDY ID at the end 
-const char *ssid_buddy = "BUDDY-FR046"; // Keep "BUDDY-" and add your BADDY ID at the end
+const char *BADDY_ID = "DK004"; // Usually CCDDD where CC is your country and DDD is a 3 digit number between 000 and 999
+const char *ssid = "BADDY-DK004"; // Keep "BADDY-" and add your BADDY ID at the end 
+const char *ssid_buddy = "BUDDY-DK004"; // Keep "BUDDY-" and add your BADDY ID at the end
 
 //const char *ssid = "BADDY-WIFI-TEST";
 
@@ -1341,7 +1341,7 @@ int set_stroke(int stroke)
     {
         Serial.println("Clear Center shot speed command sent to motor");
         // Special trick to handle potential battery cut off
-        MotorLeft.writeMicroseconds(1150);
+        /*MotorLeft.writeMicroseconds(1150);
         MotorRight.writeMicroseconds(1150);
         delay(200);
         MotorLeft.writeMicroseconds(1200);
@@ -1353,6 +1353,7 @@ int set_stroke(int stroke)
         MotorLeft.writeMicroseconds(1300);
         MotorRight.writeMicroseconds(1300);
         delay(200);
+        */
         //End of special trick
 
         MotorLeft.writeMicroseconds(CLEAR_CENTER_SHOT_LEFT_MOTOR);
@@ -1670,21 +1671,21 @@ int motor_speed_transition(int type, int next_type){
             // Special trick to handle potential battery cut off
             MotorLeft.writeMicroseconds(1150);
             MotorRight.writeMicroseconds(1150);
-            delay(200);
+            delay(150);
             MotorLeft.writeMicroseconds(1200);
             MotorRight.writeMicroseconds(1200);
-            delay(200);
+            delay(150);
             MotorLeft.writeMicroseconds(1250);
             MotorRight.writeMicroseconds(1250);
-            delay(200);
+            delay(150);
             MotorLeft.writeMicroseconds(1300);
             MotorRight.writeMicroseconds(1300);
-            delay(200);
+            delay(150);
             //End of special trick
 
             MotorLeft.writeMicroseconds(CLEAR_CENTER_SHOT_LEFT_MOTOR);
             MotorRight.writeMicroseconds(CLEAR_CENTER_SHOT_RIGHT_MOTOR);
-            return 800;
+            return 600;
     }
 
     if ( ((type == 1)||(type == 2)||(type == 3)||(type>10))&&((next_type == 9)) ){
@@ -1959,16 +1960,16 @@ int motor_speed_transition(int type, int next_type){
             // Special trick to handle potential battery cut off
             MotorLeft.writeMicroseconds(1150);
             MotorRight.writeMicroseconds(1150);
-            delay(200);
+            delay(150);
             MotorLeft.writeMicroseconds(1200);
             MotorRight.writeMicroseconds(1200);
-            delay(200);
+            delay(150);
             MotorLeft.writeMicroseconds(1250);
             MotorRight.writeMicroseconds(1250);
-            delay(200);
+            delay(150);
             MotorLeft.writeMicroseconds(1300);
             MotorRight.writeMicroseconds(1300);
-            delay(200);
+            delay(150);
             //End of special trick
 
             MotorLeft.writeMicroseconds(CLEAR_CENTER_SHOT_LEFT_MOTOR);
@@ -2092,7 +2093,7 @@ void ReadSequence(){
 
             if(flag_new_sequence)// avoid having one shot when ABORT received (may happen with Async server)
             {
-                set_stroke(stroke_seq[i]);
+
                 if (stroke_seq[i] < 10) // in case of BUDDY shot, no shot!
                 {
                     servo_fire();
@@ -2123,6 +2124,7 @@ void ReadSequence(){
             }
 
             i++;
+            set_stroke(stroke_seq[i]);
         }
         Serial.print("New command received, EXIT ReadSequence");
         flag_new_sequence = 0;
@@ -2149,7 +2151,6 @@ void ReadSequence(){
 
             if(flag_new_sequence)// avoid having one shot when ABORT received (may happen with Async server)
             {
-                set_stroke(stroke_seq[i]);
                 if (stroke_seq[i] < 10) // in case of BUDDY shot, no shot!
                 {
                     servo_fire();
@@ -2203,6 +2204,7 @@ void ReadSequence(){
             if((stroke_seq[i]==0)||(i==20)){
                 i=0; // End of the sequence, let's go back to the beginning
             }
+            set_stroke(stroke_seq[i]);
 
        }
 
@@ -2295,7 +2297,7 @@ void ReadSequence(){
 
                     // Computing next shot randomly
                     random_id_next = random(0,stroke_count);
-                    set_stroke(stroke_seq[random_id_next]);
+
 
                     if (motor_speed_transition(stroke_seq[random_id],stroke_seq[random_id_next]) >0){
                         if (speed >1000){
@@ -2307,6 +2309,7 @@ void ReadSequence(){
                             delay(speed-COMPUTATION_TIMER);
                         }
                     }
+                    set_stroke(stroke_seq[random_id_next]);
                     random_id = random_id_next;
 
                 }
