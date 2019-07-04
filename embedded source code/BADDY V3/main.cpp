@@ -8,7 +8,7 @@
 
 
     ###########################################################################
-    BADDY_EMBEDDED_CODE_ESP_V01.ino - Embedded source code of BADDY ESP (wifi version)
+    BADDY_EMBEDDED_CODE_ESP_V03.cpp - Embedded source code of BADDY ESP (wifi version) to put in main.cpp in VScode PlatformIO
     Copyright (C) 2017  GRESLEBIN Benoit
     ###########################################################################
 
@@ -45,6 +45,7 @@
     LedControl.h is a software library under MIT license, Copyright (c) 2007-2015 Eberhard Fahle
     ArduinoJson.h is a software library, Copyright (c) Benoit Blanchon
     ESPAsyncWebServer.h and ESPAsyncTCP.h are software libraries, Copyright (c) by Hristo Gochkov
+    mDNSResolver by Myles Eftos
 
     ######################################
     HISTORY
@@ -55,6 +56,7 @@
     Dec 2018 - Battery level management, taking into account latest battery level management
     Jan 2019 - Change acceleration settings to prevent triggering battery protect feature. Update transition_speed() method between drop shots
     June 2019 - Firmware v2.0.1 / hot spot connection, compatibility with GO BADDY app V3
+    July 2019 - Firmware v2.0.5 / updates on BUDDY mode control
 */
 
 #include <Arduino.h>
