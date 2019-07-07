@@ -62,7 +62,7 @@
 #include <Arduino.h>
 #include <LedControl.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266Ping.h>
+//#include <ESP8266Ping.h>
 #include <Servo.h>
 #include <ArduinoJson.h>
 #include "FS.h"
