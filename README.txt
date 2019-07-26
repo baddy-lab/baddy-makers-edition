@@ -41,5 +41,5 @@ CHANGE LOG - HISTORY
 ######################################
 
 February 2018 - First open release
-November 2018 - New git lab using Electrolab environement
+November 2018 - New git lab using Electrolab environment
 January 2019 - New git public repository on GitHub
