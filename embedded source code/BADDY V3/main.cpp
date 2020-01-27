@@ -8,7 +8,7 @@
 
 
     ###########################################################################
-    BADDY_EMBEDDED_CODE_ESP_V03.cpp - Embedded source code of BADDY ESP (wifi version) to put in main.cpp in VScode PlatformIO
+    BADDY_EMBEDDED_CODE_ESP_V01.ino - Embedded source code of BADDY ESP (wifi version)
     Copyright (C) 2017  GRESLEBIN Benoit
     ###########################################################################
 
@@ -45,7 +45,6 @@
     LedControl.h is a software library under MIT license, Copyright (c) 2007-2015 Eberhard Fahle
     ArduinoJson.h is a software library, Copyright (c) Benoit Blanchon
     ESPAsyncWebServer.h and ESPAsyncTCP.h are software libraries, Copyright (c) by Hristo Gochkov
-    mDNSResolver by Myles Eftos
 
     ######################################
     HISTORY
@@ -57,12 +56,12 @@
     Jan 2019 - Change acceleration settings to prevent triggering battery protect feature. Update transition_speed() method between drop shots
     June 2019 - Firmware v2.0.1 / hot spot connection, compatibility with GO BADDY app V3
     July 2019 - Firmware v2.0.5 / updates on BUDDY mode control
+    Jan 2020 - optimization and fixes for BUDDY synchro issues. Activation of All you can eat feature for BUDDY mode
 */
 
 #include <Arduino.h>
 #include <LedControl.h>
 #include <ESP8266WiFi.h>
-//#include <ESP8266Ping.h>
 #include <Servo.h>
 #include <ArduinoJson.h>
 #include "FS.h"
@@ -90,7 +89,7 @@
 
 // ESP Pin configurations end
 
-String baddy_firmware_version = "2.0.5";
+String baddy_firmware_version = "2.0.7";
 
 String connect_mode = "";
 bool flag_new_sequence = false;
@@ -99,7 +98,7 @@ bool buddy_around = false;
 String JsonSequence;
 
 //Wifi related static values for BADDY as a server
-const char *BADDY_ID = "PT002"; // Usually CCDDD where CC is your country and DDD is a 3 digit number between 000 and 999
+const char *BADDY_ID = "BADDY-V2"; // Usually CCDDD where CC is your country and DDD is a 3 digit number between 000 and 999
 String ssid; // Keep "BADDY-" and add your BADDY ID at the end
 const char *ssid_init = "BADDY";
 const char *password_init = "";
@@ -165,6 +164,7 @@ String json_config; // Needed to expose variable to Rest API
 String json_status;
 String json_playmode_dump;
 bool flag_test_shot = 0;
+bool all_you_can_eat_flag = 0;
 
 bool running_status = false; // boolean flag that indicates if BADDY running or stopped (motors don't spin), initialized with 0
 int battery_level;     // Battery level management
@@ -1591,7 +1591,15 @@ int warmup(int stroke)
         Serial.println("Drop left shot speed command sent to motor");
         MotorLeft.writeMicroseconds(DROP_LEFT_SHOT_LEFT_MOTOR);
         MotorRight.writeMicroseconds(DROP_LEFT_SHOT_RIGHT_MOTOR);
-        COUNTER_DROP_LEFT++;
+        if (PlayMode==2&&buddy_around) // BADDY BUDDY mode
+        {
+            COUNTER_DROP_CENTER++;
+        }
+        else
+        {
+            COUNTER_DROP_LEFT++;
+        }
+        
         delay(2000);
 
     }
@@ -1600,7 +1608,16 @@ int warmup(int stroke)
         Serial.println("Drop Center shot speed command sent to motor");
         MotorLeft.writeMicroseconds(DROP_CENTER_SHOT_LEFT_MOTOR);
         MotorRight.writeMicroseconds(DROP_CENTER_SHOT_RIGHT_MOTOR);
-        COUNTER_DROP_CENTER++;
+
+        if (PlayMode==2&&buddy_around) // BADDY BUDDY mode
+        {
+            COUNTER_DROP_RIGHT++;
+        }
+        else
+        {
+            COUNTER_DROP_CENTER++;
+        }
+
         delay(2000);
     }
     else if (stroke==3)
@@ -1616,7 +1633,16 @@ int warmup(int stroke)
         Serial.println("Drive Left shot speed command sent to motor");
         MotorLeft.writeMicroseconds(DRIVE_LEFT_SHOT_LEFT_MOTOR);
         MotorRight.writeMicroseconds(DRIVE_LEFT_SHOT_RIGHT_MOTOR);
-        COUNTER_DRIVE_LEFT++;
+
+        if (PlayMode==2&&buddy_around) // BADDY BUDDY mode
+        {
+            COUNTER_DRIVE_CENTER++;
+        }
+        else
+        {
+            COUNTER_DRIVE_LEFT++;
+        }
+
         delay(2000);
     }
     else if (stroke==5)
@@ -1624,7 +1650,16 @@ int warmup(int stroke)
         Serial.println("Drive Center shot speed command sent to motor");
         MotorLeft.writeMicroseconds(DRIVE_CENTER_SHOT_LEFT_MOTOR);
         MotorRight.writeMicroseconds(DRIVE_CENTER_SHOT_RIGHT_MOTOR);
-        COUNTER_DRIVE_CENTER++;
+
+        if (PlayMode==2&&buddy_around) // BADDY BUDDY mode
+        {
+            COUNTER_DRIVE_RIGHT++;
+        }
+        else
+        {
+            COUNTER_DRIVE_CENTER++;
+        }
+        
         delay(2000);
     }
     else if (stroke==6)
@@ -1640,7 +1675,16 @@ int warmup(int stroke)
         Serial.println("Clear Left shot speed command sent to motor");
         MotorLeft.writeMicroseconds(CLEAR_LEFT_SHOT_LEFT_MOTOR);
         MotorRight.writeMicroseconds(CLEAR_LEFT_SHOT_RIGHT_MOTOR);
-        COUNTER_CLEAR_LEFT++;
+
+        if (PlayMode==2&&buddy_around) // BADDY BUDDY mode
+        {
+            COUNTER_CLEAR_CENTER++;
+        }
+        else
+        {
+            COUNTER_CLEAR_LEFT++;
+        }
+        
         delay(2000);
     }
     else if (stroke==8)
@@ -1664,7 +1708,16 @@ int warmup(int stroke)
 
         MotorLeft.writeMicroseconds(CLEAR_CENTER_SHOT_LEFT_MOTOR);
         MotorRight.writeMicroseconds(CLEAR_CENTER_SHOT_RIGHT_MOTOR);
-        COUNTER_CLEAR_CENTER++;
+
+        if (PlayMode==2&&buddy_around) // BADDY BUDDY mode
+        {
+            COUNTER_CLEAR_RIGHT++;
+        }
+        else
+        {
+            COUNTER_CLEAR_CENTER++;
+        }
+        
         delay(1200);
     }
     else if (stroke==9)
@@ -1673,6 +1726,50 @@ int warmup(int stroke)
         MotorLeft.writeMicroseconds(CLEAR_RIGHT_SHOT_LEFT_MOTOR);
         MotorRight.writeMicroseconds(CLEAR_RIGHT_SHOT_RIGHT_MOTOR);
         COUNTER_CLEAR_RIGHT++;
+        delay(2000);
+    }
+    else // in case we have BUDDY shot, we put idle speed, and of course wait for 2 sec to circumvent asynchronous BUDDY issues
+    {
+        Serial.println("BUDDY shot, so idle speed is set");
+        MotorLeft.writeMicroseconds(DROP_CENTER_SHOT_LEFT_MOTOR);
+        MotorRight.writeMicroseconds(DROP_CENTER_SHOT_RIGHT_MOTOR);
+        if (stroke==11)
+        {
+            COUNTER_DROP_LEFT++;
+        }
+        else if (stroke==12)
+        {
+            COUNTER_DROP_CENTER++;
+        }
+        else if (stroke==13)
+        {
+            COUNTER_DROP_RIGHT++;
+        }
+        else if (stroke==14)
+        {
+            COUNTER_DRIVE_LEFT++;
+        }
+        else if (stroke==15)
+        {
+            COUNTER_DRIVE_CENTER++;
+        }
+        else if (stroke==16)
+        {
+            COUNTER_DRIVE_RIGHT++;
+        }
+        else if (stroke==17)
+        {
+            COUNTER_CLEAR_LEFT++;
+        }
+        else if (stroke==18)
+        {
+            COUNTER_CLEAR_CENTER++;
+        }
+        else if (stroke==19)
+        {
+            COUNTER_CLEAR_RIGHT++;
+        }
+
         delay(2000);
     }
 
@@ -1777,8 +1874,8 @@ int motor_speed_transition(int type, int next_type){
         return 0;
     }
 
-    // Here, we manage BADDY BUDDY time considerations between strokes
-
+    // Here, we manage BADDY BUDDY time considerations between strokes - section kept out as i needed more tangible finetuning
+    /*
     if ((next_type == 11)||(next_type ==12)||(next_type ==13)){
         return 0; //we do nothing
     }
@@ -1790,6 +1887,7 @@ int motor_speed_transition(int type, int next_type){
     if ((next_type == 17)||(next_type ==19)){
         return 0;
     }
+    */
 
     // End of BADDY BUDDY timer considerations
 
@@ -2199,6 +2297,185 @@ int motor_speed_transition(int type, int next_type){
                 return(0);
             }
         }
+
+        else if (next_type == 11)
+        {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+        }
+        else if (next_type == 12)
+        {
+            if (type==11)
+            {
+                delay(560);
+                return(560); // we deduce by the time needed to break
+            }
+            else if (type==13)
+            {
+                delay(560);
+                return(560); // we deduce by the time needed to break
+            }
+            else if (type==14)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==15)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==16)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==17)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==18)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==19)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else
+            {
+                return(0); // we deduce by the time needed to break
+            }
+
+        }
+        else if (next_type == 13)
+        {
+
+                delay(480);
+                return(480); // we deduce by the time needed to break
+
+        }
+        else if (next_type == 14)
+        {
+
+            if (type==15)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+
+            else if (type==17)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            
+            else if (type==18)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else
+            {
+                return(0); // we deduce by the time needed to break
+            }
+
+        }
+        else if (next_type == 15)
+        {
+        
+            if (type==14)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==16)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==17)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==18)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==19)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else
+            {
+                return(0); // we deduce by the time needed to break
+            }
+            
+
+        }
+        else if (next_type == 16)
+        {
+
+            if (type == 15)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==18)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type==19)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else
+            {
+                return(0); // we deduce by the time needed to break
+            }
+
+        }
+        else if (next_type == 17)
+        {
+                delay(600); // Avoid battery protect triggering, so delay is greater
+                return(600); // we deduce by the time needed to break
+        }
+        else if (next_type == 18)
+        {
+            if (type == 19)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else if (type == 17)
+            {
+                delay(480);
+                return(480); // we deduce by the time needed to break
+            }
+            else
+            {
+                return(0);
+            }
+                
+        }
+
+        else if (next_type == 19)
+        {
+
+                delay(600); // Avoid battery protect triggering, so delay is greater
+                return(600); // we deduce by the time needed to break
+        }
+
+
+
     }
     else
     {
@@ -2230,6 +2507,7 @@ void ReadSequence(){
         if ((PlayMode==2)&&(buddy_around)){
 
             buddy_send_abort();
+            all_you_can_eat_flag = 0;
 
         }
 
@@ -2265,6 +2543,7 @@ void ReadSequence(){
                 running_status=false;
                 //update_status();
                 flag_new_sequence = 0;
+                all_you_can_eat_flag = 0;
                 break;
 
             }
@@ -2284,7 +2563,12 @@ void ReadSequence(){
                     Serial.print("Shot id is: ");
                     Serial.println(i);
                     Serial.println("********* BUDDY SHOT! **********");
-                    delay(RETAINER_TIMER*2 + SWITCH_TIMER*2);
+
+                    if (speed_seq[i] > 0) // condition for fast transitions in case period is 0
+                    {
+                        delay(RETAINER_TIMER*2 + SWITCH_TIMER*2);
+                    }
+
                 }
 
                 speed = set_speed(speed_seq[i]); // convert speed id into milliseconds
@@ -2343,9 +2627,13 @@ void ReadSequence(){
                     Serial.print("Shot id is: ");
                     Serial.println(i);
                     Serial.println("********* BUDDY SHOT! **********");
-                    delay(RETAINER_TIMER*2 + SWITCH_TIMER*2);
-                }
 
+                    if (speed_seq[i] > 0) // condition for fast transitions in case period is 0
+                    {
+                        delay(RETAINER_TIMER*2 + SWITCH_TIMER*2);
+                    }
+            
+                }
 
                 speed = set_speed(speed_seq[i]); // convert speed id into milliseconds
 
@@ -2564,7 +2852,13 @@ int sequencefetch(String Json){
         MotorRight.writeMicroseconds(STOP);
 
         if (PlayMode==2){ // Transmit to BUDDY if PlayMode 2
+
             buddy_send_abort();
+
+            if (all_you_can_eat_flag) // Reset flag
+            {
+                all_you_can_eat_flag = 0;
+            }
         }
 
         running_status=false;
@@ -2593,6 +2887,7 @@ int sequencefetch(String Json){
 
         if (PlayMode==2&&buddy_around) // BADDY BUDDY mode
         {
+            stroke_count = 0; //init
             Serial.println("BADDY BUDDY mode here, dispatching stroke sequences!");
             // Preparing Json object
             DynamicJsonBuffer jsonBufferBuddy;
@@ -2603,26 +2898,44 @@ int sequencefetch(String Json){
             JsonArray& Speeds_buddy = SequenceBuddy.createNestedArray("Speeds");
             SequenceBuddy["LoopMode"] = loop_mode_seq;
 
+            for (i=0;i<20;i++)
+            {
+                if (stroke_sequence[i]!= 0)
+                {
+                stroke_count++;
+                }
+            }
+
+            Serial.print("Total number of strokes: ");
+            Serial.println(stroke_count);
+
+            // Detect all you can eat situation
+
+            if ((stroke_sequence[0] != 1)&&(stroke_sequence[0] != 3)&&(stroke_count == 2)&&(speed_sequence[0] == 0))
+            {
+                Serial.print("ALL YOU CAN EAT sequence!");
+                all_you_can_eat_flag = 1;
+            }
+
+            // End of all you can eat detect
+
             if (loop_mode_seq == 2) // Well, we will rebuild playing sequence randomly in case of BUDDY mode
             {
-                int stroke_count=0;
                 int random_sequence_buddy[20];
                 int random_speed_buddy[20];
-                for (i=0;i<20;i++)
-                {
-                    if (stroke_sequence[i]!= 0)
-                    {
-                    stroke_count++;
-                    }
-                }
-
-                Serial.print("Total number of strokes: ");
-                Serial.println(stroke_count);
 
                 for (i=0;i<20;i++)
                 {
                     random_sequence_buddy[i] = stroke_sequence[random(0,stroke_count)];
-                    random_speed_buddy[i] = speed_sequence[random(0,stroke_count)];
+                    
+                    if (all_you_can_eat_flag)
+                    {
+                        random_speed_buddy[i] = 0;
+                    } 
+                    else
+                    {
+                        random_speed_buddy[i] = speed_sequence[random(0,stroke_count)];
+                    } 
                 }
 
                 Serial.println("Sequence before BUDDY random remix: ");
@@ -2633,8 +2946,8 @@ int sequencefetch(String Json){
                     stroke_sequence[i] = random_sequence_buddy[i];
                     speed_sequence[i] = random_speed_buddy[i];
                 }
-                Serial.println("New sequence after BUDDY random remix");
-                root.prettyPrintTo(Serial);
+                //Serial.println("New sequence after BUDDY random remix");
+                //root.prettyPrintTo(Serial);
 
                 loop_mode_seq = 1;
                 SequenceBuddy["LoopMode"] = loop_mode_seq;
@@ -2642,10 +2955,10 @@ int sequencefetch(String Json){
                 Serial.println(loop_mode_seq);
             }
 
-            //Serial.println("Print of sequence object before dispatch: ");
-            //root.prettyPrintTo(Serial);
+            Serial.println("Print of sequence object before dispatch: ");
+            root.prettyPrintTo(Serial);
 
-            // TIme to dispatch strokes between BADDY and BUDDY
+            // Time to dispatch strokes between BADDY and BUDDY
             bool my_turn = true;
 
             for (i=0;i<20;i++)
@@ -2654,14 +2967,13 @@ int sequencefetch(String Json){
 
                     stroke_seq[i] = 11;
                     Strokes_buddy.add(2);
-                    //stroke_seq_buddy[i] = 2;
                 }
                 else if (stroke_sequence[i] == 2){
 
                     if (my_turn){
                     stroke_seq[i] = 12;
                     Strokes_buddy.add(3);
-                    //stroke_seq_buddy[i] = 3;
+
                     my_turn = false;
                     }
                     else{
@@ -2741,13 +3053,21 @@ int sequencefetch(String Json){
                     return 0;
                 }
 
-                speed_seq[i] = speed_sequence[i]; // Speeds remain the same!
+                if ((all_you_can_eat_flag == 0)&&(speed_sequence[i] == 0))
+                {
+                    speed_seq[i] = 1; // set up the minimum period 
+                }
+                else
+                {
+                    speed_seq[i] = speed_sequence[i]; // Speeds remain the same!
+                }
+
                 Speeds_buddy.add(speed_seq[i]);
 
             }
-/*
-            Serial.print("Dumping strokes of BADDY master: ");
 
+            Serial.println("Dumping strokes of BADDY master: ");
+/*
             for (i=0;i<20;i++)
             {
                 Serial.print(stroke_seq[i]);
@@ -2781,8 +3101,16 @@ int sequencefetch(String Json){
             //SequenceBuddy.prettyPrintTo(Serial);
 
             buddy_send_json(sequence_buddy);
-            delay(BUDDY_TIMER); // we wait until BUDDY processes the sequence
 
+            if (all_you_can_eat_flag)// enables to find shortest time period between 2 BADDY when BUDDY mode
+            {
+                delay(BUDDY_TIMER+SWITCH_TIMER+RETAINER_TIMER); // we wait until BUDDY processes the sequence
+            }
+            else
+            {
+                delay(BUDDY_TIMER);// we wait until BUDDY processes the sequence
+            }
+            
         }
         else // No BADDY BUDDY mode Here
         {
@@ -2963,6 +3291,14 @@ void setup() {
 
     Serial.begin(9600);
 
+    // Motor pins allocation
+    MotorRight.attach(MOTOR_RIGHT_PIN);
+    MotorRight.writeMicroseconds(STOP);
+    MotorLeft.attach(MOTOR_LEFT_PIN);
+    MotorLeft.writeMicroseconds(STOP);
+
+    // Motor pins allocation end
+
     // Manage BADDY config file stored in File system
     SPIFFS.begin();
     //SPIFFS.format();
@@ -2976,19 +3312,6 @@ void setup() {
     stationDisconnectedHandler = WiFi.onSoftAPModeStationDisconnected(&onStationDisconnected);
 
     // End of BADDY config file management
-
-    // Motor pins allocation
-    MotorRight.attach(MOTOR_RIGHT_PIN);
-    MotorRight.writeMicroseconds(STOP);
-    MotorLeft.attach(MOTOR_LEFT_PIN);
-    MotorLeft.writeMicroseconds(STOP);
-
-    ShuttleSwitch.attach(SHUTTLE_SWITCH_PIN);
-    ShuttleSwitch.write(SWITCH_SHORT_POSITION);
-    ShuttleRetainer.attach(SHUTTLE_RETAINER_PIN);
-    ShuttleRetainer.write(RETAINER_DOWN_POSITION);
-    // Motor pins allocation end
-
 
     // Select if we have to set BADDY or BUDDY mode
 
@@ -3108,7 +3431,15 @@ void setup() {
         }
 
         MDNS.update();
+
     }
+
+    // Setting up servo motors after network declarations, because MDNS calls used to send dummy signals to the servo motors...
+    ShuttleSwitch.attach(SHUTTLE_SWITCH_PIN);
+    ShuttleSwitch.write(SWITCH_SHORT_POSITION);
+    ShuttleRetainer.attach(SHUTTLE_RETAINER_PIN);
+    ShuttleRetainer.write(RETAINER_DOWN_POSITION);
+    // Servo motors declration and init end
 
 // End of Test
 
@@ -3236,6 +3567,7 @@ void setup() {
 
             Serial.println(JsonSequence);
             flag_new_sequence = false;
+            all_you_can_eat_flag = 0; // release flag
 
         }
         else
