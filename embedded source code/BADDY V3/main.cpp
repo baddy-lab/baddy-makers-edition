@@ -1991,24 +1991,12 @@ int motor_speed_transition(int type, int next_type){
                 break_motor_right(DROP_LEFT_SHOT_RIGHT_MOTOR);
                 return(480); // we deduce by the time needed to break
             }
-            if (type==7)
+            if ((type == 7)||(type == 8)||(type == 9))
             {
                 break_motor_left(DROP_LEFT_SHOT_LEFT_MOTOR+50);
                 break_motor_right(DROP_LEFT_SHOT_RIGHT_MOTOR);// Trick to fetch motor's speed faster (accomodate ESC potential lack reactivity/wheels intertia)
                 return(480); // we deduce by the time needed to break
 
-            }
-            if (type==8)
-            {
-                break_motor_left(DROP_LEFT_SHOT_LEFT_MOTOR+50);
-                break_motor_right(DROP_LEFT_SHOT_RIGHT_MOTOR);
-                return(480); // we deduce by the time needed to break
-            }
-            if (type==9);
-            {
-                break_motor_left(DROP_LEFT_SHOT_LEFT_MOTOR+50);
-                break_motor_right(DROP_LEFT_SHOT_RIGHT_MOTOR);
-                return(480); // we deduce by the time needed to break
             }
             }
             else if (next_type == 2)
