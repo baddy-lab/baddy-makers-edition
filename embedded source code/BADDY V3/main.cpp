@@ -2030,17 +2030,7 @@ int motor_speed_transition(int type, int next_type){
                 break_motor_right(DROP_CENTER_SHOT_RIGHT_MOTOR);
                 return(480); // we deduce by the time needed to break
             }
-            if (type==7)
-            {
-                break_motor_all(DROP_CENTER_SHOT_RIGHT_MOTOR);
-                return(480); // we deduce by the time needed to break
-            }
-            if (type==8)
-            {
-                break_motor_all(DROP_CENTER_SHOT_RIGHT_MOTOR);
-                return(480); // we deduce by the time needed to break
-            }
-            if (type==9);
+            if ((type == 7)||(type == 8)||(type == 9))
             {
                 break_motor_all(DROP_CENTER_SHOT_RIGHT_MOTOR);
                 return(480); // we deduce by the time needed to break
