@@ -476,7 +476,7 @@ int set_speed_spifs(String Json)
         if (root["Speeds"][index]<750 || root["Speeds"][index] > 2000) // We test if speed values are in the correct range...
         {
             Serial.print("Invalid speed value: ");
-            Serial.println(root["Speeds"][index].asString());
+            Serial.println(root["Speeds"][index].as<char*>());
             return 0;
         }
         //Serial.println(root["Speeds"][index].asString()); // For debug only
@@ -788,8 +788,8 @@ bool set_switch_forward(){
     SWITCH_SHORT_POSITION = SWITCH_SHORT_POSITION - 2;
 
     ShuttleSwitch.write(SWITCH_SHORT_POSITION); // Set actual new position
-
-        Serial.println("Saving to file system");
+    
+    Serial.println("Saving to file system");
 
     // We fetch data from file system
     File file = SPIFFS.open("/BADDY_CONFIG_FILE", "r");
@@ -1128,8 +1128,8 @@ String urlencode(String str)
     char c;
     char code0;
     char code1;
-    char code2;
-    for (int i =0; i < str.length(); i++){
+    // char code2;
+    for (unsigned i =0; i < str.length(); i++){
       c=str.charAt(i);
       if (c == ' '){
         encodedString+= '+';
@@ -1145,7 +1145,7 @@ String urlencode(String str)
         if (c > 9){
             code0=c - 10 + 'A';
         }
-        code2='\0';
+        // code2='\0';
         encodedString+='%';
         encodedString+=code0;
         encodedString+=code1;
@@ -1164,7 +1164,7 @@ String urldecode(String str)
     char c;
     char code0;
     char code1;
-    for (int i =0; i < str.length(); i++){
+    for (unsigned i =0; i < str.length(); i++){
         c=str.charAt(i);
       if (c == '+'){
         encodedString+=' ';  
@@ -1220,7 +1220,7 @@ void buddy_send_abort ()
     String sequence_buddy;
     SequenceBuddy.printTo(sequence_buddy);
 
-    buddy.begin("http://"+buddy_ip_address+"/sequence?data="+ urlencode(sequence_buddy));
+    buddy.begin(client_buddy, "http://"+buddy_ip_address+"/sequence?data="+ urlencode(sequence_buddy));
 
     //buddy.sendRequest("POST","/status");
     //buddy.addHeader("content-type","text/plain");
@@ -1237,7 +1237,7 @@ void buddy_send_abort ()
 
 void buddy_send_json(String json)
 {
-        buddy.begin("http://"+buddy_ip_address+"/sequence?data="+ urlencode(json));
+    buddy.begin(client_buddy, "http://"+buddy_ip_address+"/sequence?data="+ urlencode(json));
 
     //buddy.sendRequest("POST","/status");
     //buddy.addHeader("content-type","text/plain");
@@ -2483,6 +2483,7 @@ int motor_speed_transition(int type, int next_type){
         MotorRight.writeMicroseconds(TRANSITION_SPEED);
         return(0);
     }
+    return(0);
 }
 
 // Functions for Sequence Read
@@ -3417,7 +3418,7 @@ void setup() {
             MDNS.addService("http", "tcp", 80);
             //MDNS.addServiceTxt("buddy", "tcp", "0", "1");
             MDNS.addService("buddy", "tcp", 80);
-            buddy.begin("http://"+BaddyMasterIP.toString()+"/buddy_is_here?buddy_ip="+ urlencode(WiFi.localIP().toString()));
+            buddy.begin(client_buddy, "http://"+BaddyMasterIP.toString()+"/buddy_is_here?buddy_ip="+ urlencode(WiFi.localIP().toString()));
             int http_code = buddy.GET();
 
             Serial.print("Http code value: ");
