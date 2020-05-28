@@ -63,63 +63,6 @@ const int ProgrammerLeft[] = {1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 int time_between_sample = 0;
 
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println("");
-  Serial.println("");
-  Serial.println("");
-  Serial.println("This program will program the ESC.");
-  Serial.println("WARNING: make sure to desactivate the carriage return in the arduino terminal !");
-  Serial.print("Sample Rate (Hz): ");
-  Serial.println(samplerate);
-  time_between_sample = 1000000/samplerate;
-  Serial.print("TIme between sample (uS): ");
-  Serial.println(time_between_sample);
-  Serial.println("Just follow the instructions :)");
-  Serial.println("");
-  Serial.println("Let's start:");
-
-  WiFiOff();
-
-  //#############
-  //## Program ##
-  //#############
-  Serial.println("###### Program the ESC ######");
-  Serial.println("Turn Off Power and send any letter");
-  while (!Serial.available());
-  Serial.read();
-  Serial.println("Turn on power in:");
-  Serial.println("3");
-  delay(1000);
-  Serial.println("2");
-  delay(1000);
-  Serial.println("1");
-  delay(1000);
-  Serial.println("Now !!");
-  Serial.println("Press any key in:");
-  Serial.println("3");
-  delay(1000);
-  Serial.println("2");
-  delay(1000);
-  Serial.println("1");
-  delay(1000);
-  Serial.println("Now !!");
-  
-  while (!Serial.available());
-  Serial.read();
-  program();
-  Serial.println("ESC should make a long bip signal. If not, restart the entire process");
-  Serial.println("Program: Ok");
-  Serial.println("");
-
-  Serial.println("That's all !!");
-}
-
-void loop() {
-
-}
-
-
 void program(void){
   int val1 = 0, val2 = 0;
   int i = 0;
@@ -153,4 +96,88 @@ void program(void){
 
 void WiFiOff() {
     WiFi.forceSleepBegin();
+}
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("");
+  Serial.println("");
+  Serial.println("");
+  Serial.println("This program will program the ESC.");
+  Serial.println("WARNING: make sure to desactivate the carriage return in the arduino terminal !");
+  Serial.print("Sample Rate (Hz): ");
+  Serial.println(samplerate);
+  time_between_sample = 1000000/samplerate;
+  Serial.print("TIme between sample (uS): ");
+  Serial.println(time_between_sample);
+  Serial.println("Just follow the instructions :)");
+  Serial.println("");
+  Serial.println("Let's start:");
+
+  WiFiOff();
+
+  //#############
+  //## Program ##
+  //#############
+  delay(2000);
+  Serial.println("");
+  Serial.println("###### Program the ESC ######");
+  delay(1000);
+  Serial.println("");
+  Serial.println("");
+  Serial.println("Please make sure BADDY is switched off, and get ready to switch on when told");
+  Serial.println("");
+  Serial.println("Ready? OK Let's get ready...");
+  delay(3000);
+  Serial.println("");
+  Serial.println("");
+  Serial.println("");
+  Serial.print("Switch BADDY on in 4 ");
+  delay(1000);
+  Serial.print("3 ");
+  delay(1000);
+  Serial.print("2 ");
+  delay(1000);
+  Serial.print("1 ");
+  delay(1000);
+  Serial.println("Switch BADDY on NOW!!");
+  delay(3000);
+
+  /* Programming Max and min - just uncomment if this step is needed
+  Serial.println("Turn Off Power and send any letter");
+  while (!Serial.available());
+  Serial.read();
+  Serial.println("Turn on power in:");
+  Serial.println("3");
+  delay(1000);
+  Serial.println("2");
+  delay(1000);
+  Serial.println("1");
+  delay(1000);
+  Serial.println("Now !!");
+  Serial.println("Press any key in:");
+  Serial.println("3");
+  delay(1000);
+  Serial.println("2");
+  delay(1000);
+  Serial.println("1");
+  delay(1000);
+  Serial.println("Now !!");
+  
+  while (!Serial.available());
+  Serial.read();
+  */
+  
+  program();
+  Serial.println("ESC should make a long bip signal. If not, restart the entire process");
+  Serial.println("Program: Ok");
+  Serial.println("");
+
+  Serial.println("That's all !!");
+  Serial.println("");
+  Serial.println("You may now flash your electonic board with latest code available on BADDY Lab github");
+}
+
+void loop() {
+
 }
