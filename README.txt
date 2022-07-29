@@ -11,16 +11,16 @@ CERN OHL v. 1.1.  You may redistribute and modify this documentation
 under the terms of the CERN OHL v.1.1. (http://ohwr.org/cernohl). This
 documentation is distributed WITHOUT ANY EXPRESS OR IMPLIED WARRANTY,
 INCLUDING OF MERCHANTABILITY, SATISFACTORY QUALITY AND FITNESS FOR A
-PARTICULAR PURPOSE. Please see the CERN OHL v.1.1 for applicable conditions
+PARTICULAR PURPOSE. Please see the CERN OHL v.1.1 for applicable conditions.
 
 ######################################
 ADDITIONAL TERMS
 ######################################
-Specific non commercial use term: This source Hardware plan may be copied, distributed, modified by any individual
-and non profit organizations (Fablab, Hackerspaces, Makerspaces, universities, Schools), as long
+Specific non-commercial use term: This source Hardware plan may be copied, distributed, or modified by any individual
+and non-profit organizations (Fablab, Hackerspaces, Makerspaces, universities, Schools), as long
 as it follows the CERN OHL V1.1 license terms here attached.
 Corporate institutions and private companies may only copy and distribute the Hardware plan without modification.
-Therefore, they are not allowed to modify the Hardware plan prior to distributing it for commercial purpose.
+Therefore, they are not allowed to modify the Hardware plan prior to distributing it for commercial purposes.
 So for example, if a user embeds or modifies or relies on the Hardware plan in a product that is
 then sold to a third party, this would be a violation of the Non-Commercial Use License additional term. 
 By adding this additional restriction, it is intended to encourage the evolution of BADDY Hardware plan 
@@ -29,7 +29,7 @@ and design to be driven by the Hacker and makers' communities.
 ######################################
 CONTRIBUTORS
 ######################################
-Any change to be proposed on this gitlab, or at contact@baddy.space
+Any change to be proposed on this GitLab, or at contact@baddy.space
 
 ######################################
 PRODUCTS AND DISTRIBUTORS
